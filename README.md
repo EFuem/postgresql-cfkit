@@ -5,16 +5,14 @@ Tools for constructing and manipulating datasets for fitting interatomic potenti
 
 Using `pip`:
 ```
-pip install git+https://github.com/colabfit/colabfit-tools.git@master
+pip install colabfit-kit
 ```
 
-You should also follow the instructions in the documentation for [installing and running a Mongo server](https://colabfit.github.io/colabfit-tools/html/getting_started.html#installing-mongo)
-
 # Documentation
-The documentation can be found online at https://colabfit.github.io/colabfit-tools/.
+Full documentation is currently a work in progress.
 
-# Example data
-Contact [Eric](https://github.com/EFuem/) if you would like access to the datasets associated with [the provided examples](examples).
+# Contact
+Contact [Eric](https://github.com/EFuem/) if you have questions or comments.
 
 # License
 The ColabFit Tools package is copyrighted by the Regents of the University of
