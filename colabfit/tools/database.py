@@ -1548,39 +1548,18 @@ class DataManager:
 
     def create_pg_univ_table(self):
         sql = """
-        CREATE TABLE parameter_definition (
+        CREATE TABLE dataset_universal_parameters (
             id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-            name text NOT NULL UNIQUE,
-            description text,
-            data_type integer NOT NULL REFERENCES data_type(datatype_id)
+            dataset_id character varying NOT NULL,
+            parameter_name text NOT NULL,
+            parameter_value character varying NOT NULL,
+            "timestamp" timestamp without time zone DEFAULT now() NOT NULL
         );
 
-        INSERT INTO parameter_definition (id, name, description, data_type) VALUES
-            (1, 'code', 'Which software is being used for the calculation', 3),
-            (2, 'version', 'Version of the code used', 3),
-            (3, 'executable_path', 'Absolute path to the binary', 3),
-            (4, 'xc', 'Which exchange correlation functional used', 3),
-            (5, 'planewave_cutoff', 'Planewave cutoff for the code', 1),
-            (7, 'kspacing', 'Kspacing in reciprocal space (Not multiplied by 2pi)', 2),
-            (10, 'smearing_value', 'Value for smearing', 2),
-            (11, 'energy_convergence', 'Energy convergence value', 2),
-            (12, 'force_convergence', 'Force convergence', 2),
-            (13, 'spin_mode', 'Type of spin calculation', 3),
-            (15, 'pseudopotential_library', 'Pseudopotential library being used in simulation', 3),
-            (16, 'ion_relax', 'Ionic optimization', 4),
-            (17, 'cell_relax', 'Cell optimization', 4),
-            (18, 'mixing_mode', 'Electronic mixing method', 3),
-            (19, 'mixing_value', 'Electronic mixing value', 2),
-            (20, 'vdw_correction', 'Type of Van der Waals correction', 3),
-            (21, 'hubbard_method', 'Methodology for applying Hubbard U corrections (Default to Dudarev)', 3),
-            (22, 'hubbard_orbitals', 'Set which l-quantum number the correction is applied', 1),
-            (23, 'hubbard_u', 'Hubbard U correction value', 2),
-            (24, 'hubbard_j', 'Hubbard J correction value', 2),
-            (14, 'diagonalization_method', 'Diagonalization method', 3),
-            (26, 'magnetic_moments', 'Magnetic moments for each atom', 3),
-            (27, 'ion_optimization_method', 'Method for optimizing ions', 3),
-            (9, 'smearing_method', 'Type of smearing', 3);
+        ALTER TABLE ONLY dataset_universal_parameters
+            ADD CONSTRAINT dataset_parameters_parameter_definition_fk FOREIGN KEY (parameter_name) REFERENCES parameter_definition(name);
         """
+
         with psycopg.connect(dbname=self.dbname, user=self.user, port=self.port, host=self.host, password=self.password) as conn:
             with conn.cursor() as curs:
                 curs.execute(sql)
@@ -1588,13 +1567,37 @@ class DataManager:
     def create_pg_param_def_table(self):
         sql = """
         CREATE TABLE parameter_definition (
-        id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-        name text NOT NULL UNIQUE,
-        description text,
-        data_type integer NOT NULL,
-        CONSTRAINT parameter_definition_data_type_fk FOREIGN KEY (data_type)
-            REFERENCES data_type(datatype_id)
+            id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+            name text NOT NULL UNIQUE,
+            description text,
+            data_type integer NOT NULL REFERENCES data_type(datatype_id)
         );
+
+        INSERT INTO parameter_definition (name, description, data_type) VALUES
+            ('code', 'Which software is being used for the calculation', 3),
+            ('version', 'Version of the code used', 3),
+            ('executable_path', 'Absolute path to the binary', 3),
+            ('xc', 'Which exchange correlation functional used', 3),
+            ('planewave_cutoff', 'Planewave cutoff for the code', 1),
+            ('kspacing', 'Kspacing in reciprocal space (Not multiplied by 2pi)', 2),
+            ('smearing_value', 'Value for smearing', 2),
+            ('energy_convergence', 'Energy convergence value', 2),
+            ('force_convergence', 'Force convergence', 2),
+            ('spin_mode', 'Type of spin calculation', 3),
+            ('pseudopotential_library', 'Pseudopotential library being used in simulation', 3),
+            ('ion_relax', 'Ionic optimization', 4),
+            ('cell_relax', 'Cell optimization', 4),
+            ('mixing_mode', 'Electronic mixing method', 3),
+            ('mixing_value', 'Electronic mixing value', 2),
+            ('vdw_correction', 'Type of Van der Waals correction', 3),
+            ('hubbard_method', 'Methodology for applying Hubbard U corrections (Default to Dudarev)', 3),
+            ('hubbard_orbitals', 'Set which l-quantum number the correction is applied', 1),
+            ('hubbard_u', 'Hubbard U correction value', 2),
+            ('hubbard_j', 'Hubbard J correction value', 2),
+            ('diagonalization_method', 'Diagonalization method', 3),
+            ('magnetic_moments', 'Magnetic moments for each atom', 3),
+            ('ion_optimization_method', 'Method for optimizing ions', 3),
+            ('smearing_method', 'Type of smearing', 3);
         """
         with psycopg.connect(dbname=self.dbname, user=self.user, port=self.port, host=self.host, password=self.password) as conn:
             with conn.cursor() as curs:
@@ -1608,12 +1611,12 @@ class DataManager:
             description text
         );
 
-        INSERT INTO data_type (datatype_id, datatype_name, description) VALUES
-            (1, 'Integer', 'Whole numbers'),
-            (2, 'Float', 'Decimal numbers'),
-            (3, 'String', 'Text or characters'),
-            (4, 'Bool', 'Boolean (True or False)'),
-            (5, 'JSON', 'JSON object');
+        INSERT INTO data_type (datatype_name, description) VALUES
+            ('Integer', 'Whole numbers'),
+            ('Float', 'Decimal numbers'),
+            ('String', 'Text or characters'),
+            ('Bool', 'Boolean (True or False)'),
+            ('JSON', 'JSON object');
         """
         with psycopg.connect(dbname=self.dbname, user=self.user, port=self.port, host=self.host, password=self.password) as conn:
             with conn.cursor() as curs:
