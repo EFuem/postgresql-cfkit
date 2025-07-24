@@ -90,6 +90,7 @@ class Dataset:
         publication_year: str = None,
         use_pg: bool = False,
     ):
+        print (authors)
         for auth in authors:
             if not "".join(auth.split(" ")[-1].replace("-", "")).isalpha():
                 raise RuntimeError(

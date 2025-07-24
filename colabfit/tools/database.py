@@ -1883,7 +1883,9 @@ class DataManager:
         dataset_id: str, 
         parameters: dict,
         prop_map: dict, 
-        strict=False
+        strict=False,
+        description=None,
+        authors=None,
     ):
         # Get family id
         family = dataset_id.split('_')[1]
@@ -1935,16 +1937,21 @@ class DataManager:
         s = old_ds['links'][0].split(' ')[-1].replace("'","")
         d = old_ds['links'][1].split(' ')[-1].replace("'","")
         o = old_ds['links'][2].split(' ')[-1].replace("'","")
+        
+        if description is None:
+            description = old_ds['description']
+        if authors is None:
+            authors = old_ds['authors']
 
 
         ds = Dataset(
             name=old_ds['name'],
-            authors=old_ds['authors'],
+            authors=authors,
             config_df=config_df_2,
             prop_df=prop_df_2,
             publication_link=s,
             data_link=d,
-            description=old_ds['description'],
+            description=description,
             other_links=o,
             dataset_id=new_dataset_id,
             labels=old_ds['labels'],
