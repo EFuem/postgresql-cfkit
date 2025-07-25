@@ -24,7 +24,7 @@ def colabfit(ctx):
         """,
         type=click.STRING)
 @click.option('--text','-t',
-        help="""Perform text search over dataset names, descriptions, and authors. 
+        help="""Perform text search over dataset names, descriptions, authors, and uploades. Full string over substring queries are preferred. 
 
         \b 
         """,

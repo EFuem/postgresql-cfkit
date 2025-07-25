@@ -10,7 +10,7 @@ def _query(dbname, user, password, host, port, text=None, elements=None, element
 
     if text is not None:
         # Full-text search condition
-        query_conditions.append(f"to_tsvector('english', name || ' ' || description || ' ' || array_to_string(authors, ' ')) @@ to_tsquery('english', '{text}')")
+        query_conditions.append(f"to_tsvector('english', name || ' ' || description || ' ' || array_to_string(authors, ' ') || ' ' || uploader) @@ to_tsquery('english', '{text}')")
 
     if elements is not None:
         if elements_exact is not None:
@@ -58,4 +58,5 @@ def format_print(doc):
     new_doc['nconfigurations']=doc['nconfigurations']
     new_doc['natoms']=doc['nsites']
     new_doc['uploader'] = doc['uploader']
+    new_doc['last_modified'] = doc['last_modified']
     pprint (new_doc,sort_dicts=False)

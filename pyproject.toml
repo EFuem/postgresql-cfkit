@@ -10,7 +10,7 @@ readme = "README.md"
 authors = [
     {name = 'ColabFit'}
 ]
-version = "0.0.3"
+version = "0.0.4"
 requires-python = ">= 3.10"
 dependencies = [
     "ase",
@@ -25,7 +25,9 @@ dependencies = [
     "notebook",
     "vastdb",
     "psycopg",
-    "pyspark"
+    "pyspark",
+    "click>=7.0"
+
 ]
 classifiers=[
     "Development Status :: 3 - Alpha",
@@ -39,3 +41,6 @@ exclude = ["public"]
 
 [project.urls]
 Homepage = "http://colabfit.org"
+
+[project.scripts]
+colabfit = "colabfit.cli.colabfit:colabfit"

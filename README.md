@@ -11,6 +11,21 @@ pip install colabfit-kit
 # Documentation
 Full documentation is currently a work in progress.
 
+# CLI Tool
+Provides a CLI for querying data present on local PostgreSql database.
+
+Basic usage is `colabfit query <options>`. `colabfit query --help` will display all search options.
+
+Use option `-c` to specify the json credential file of form:
+`{
+    "database_port": <>,
+    "database_path": <>,
+    "database_name": <>,
+    "database_password": <>,
+    "database_user": <>,
+    "external_file": <>
+}`
+
 # Contact
 Contact [Eric](https://github.com/EFuem/) if you have questions or comments.
 
