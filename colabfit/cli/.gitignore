@@ -1,0 +1,10 @@
+__pycache__
+*.log
+build/
+eggs/
+.eggs/
+*.egg-info/
+*.egg
+public/
+Public/
+.DS_store
