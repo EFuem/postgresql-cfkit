@@ -1,4 +1,5 @@
 import datetime
+from collections import defaultdict
 import hashlib
 import json
 import itertools
@@ -2287,6 +2288,31 @@ class DataManager:
                         curs.execute(sql3, (dataset_id, dataset_id))
         else:
             raise Exception(f'Cannot delete dataset. User must match the original uploader, {uploader}.')
+
+    def delete_items(self, item_id_list):
+        # function to COs and POs
+        ref_key = {'CO': 'configurations',
+                'PO': 'property_objects'}
+
+        assert isinstance(item_id_list, list), 'Input should be a list of PO and/or CO IDs'
+        groups = defaultdict(list)
+        for s in item_id_list:
+            key = s[:2]
+            groups[key].append(s)
+        groups = dict(groups)
+        for k,v in groups.items():
+            if k not in ref_key:
+                raise Warning(f'This function can only delete COs and POs, but found item with prefix {k}!')
+            else:
+                sql = f'''
+                DELETE FROM {ref_key[k]}
+                WHERE id IN {tuple(v)};
+                '''
+                with psycopg.connect(dbname=self.dbname, user=self.user, port=self.port, host=self.host, password=self.password) as conn:
+                    with conn.cursor() as curs:
+                        curs.execute(sql)
+
+
 
 
 class S3BatchManager:
