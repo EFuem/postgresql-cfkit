@@ -32,7 +32,7 @@ def _query(dbname, user, password, host, port, text=None, elements=None, element
         # Check if property_types array contains all specified properties
         formatted_properties = properties.split(' ')
         for p in formatted_properties:
-            query_conditions.append("{p}_count > 0")
+            query_conditions.append(f"{p}_count > 0")
 
     # Combine conditions into a single SQL WHERE clause
     where_clause = " AND ".join(query_conditions)
