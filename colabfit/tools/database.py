@@ -2366,13 +2366,7 @@ class DataManager:
                             prop_defs = [json.loads(row[0]) for row in curs.fetchall()]
                             
                             # Get properties for this dataset
-                            props_sql = f"""
-                                SELECT * FROM property_objects 
-                                WHERE dataset_id = '{dataset_id}';
-                            """
-                            curs.execute(props_sql)
-                            props = curs.fetchall()
-                            
+                            props = self.dataset_query_pg(dataset_id, 'property_objects') 
                             if props:
                                 # Calculate available properties (similar to Dataset.to_spark_row logic)
                                 prop_def_map = {}
@@ -2384,7 +2378,6 @@ class DataManager:
                                             prop_def_map[f"{pd['property-name'].replace('-','_')}_{k.replace('-','_')}"] = pd['property-name']
                                             prop_counts[f"{pd['property-name'].replace('-','_')}_{k.replace('-','_')}"] = 0
                                             break
-                                
                                 for p in props:
                                     for k in p.keys():
                                         if str(k) in prop_counts:
@@ -2395,7 +2388,6 @@ class DataManager:
                                 for k, v in prop_counts.items():
                                     if v > 0:
                                         available_props.append(prop_def_map[k])
-                                
                                 # Update the dataset with available properties
                                 update_sql = """
                                     UPDATE datasets 
