@@ -32,7 +32,7 @@ def _query(dbname, user, password, host, port, text=None, elements=None, element
         # Check if property_types array contains all specified properties
         formatted_properties = properties.split(' ')
         for p in formatted_properties:
-            query_conditions.append(f"{p}_count > 0")
+            query_conditions.append(f"'{p}' = ANY(available_properties)")
 
     # Combine conditions into a single SQL WHERE clause
     where_clause = " AND ".join(query_conditions)
@@ -57,6 +57,7 @@ def format_print(doc):
     new_doc['elements']=doc['elements']  
     new_doc['nconfigurations']=doc['nconfigurations']
     new_doc['natoms']=doc['nsites']
+    new_doc['available_properties'] = doc['available_properties']
     new_doc['uploader'] = doc['uploader']
     new_doc['last_modified'] = doc['last_modified']
     pprint (new_doc,sort_dicts=False)

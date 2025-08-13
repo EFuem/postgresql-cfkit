@@ -211,6 +211,7 @@ class Dataset:
             if v > 0:
                 available_props.append(prop_def_map[k])
         print (available_props)
+        row_dict['available_properties'] = available_props
         row_dict['energy_mean'] = np.mean(energies)
         row_dict['energy_variance'] = np.var(energies)
         row_dict['atomic_forces_count'] = forces
