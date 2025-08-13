@@ -2317,7 +2317,113 @@ class DataManager:
                     with conn.cursor() as curs:
                         curs.execute(sql)
 
-
+    def migrate_add_available_properties_column(self):
+        """
+        Migration method to add the available_properties column to existing datasets tables
+        and populate it with data from all datasets.
+        """
+        try:
+            # First, check if the column already exists
+            check_sql = """
+                SELECT column_name 
+                FROM information_schema.columns 
+                WHERE table_name = 'datasets' 
+                AND column_name = 'available_properties';
+            """
+            
+            with psycopg.connect(dbname=self.dbname, user=self.user, port=self.port, host=self.host, password=self.password) as conn:
+                with conn.cursor() as curs:
+                    curs.execute(check_sql)
+                    column_exists = curs.fetchone()
+                    
+                    if not column_exists:
+                        # Add the column if it doesn't exist
+                        add_column_sql = """
+                            ALTER TABLE datasets 
+                            ADD COLUMN available_properties VARCHAR(1000)[];
+                        """
+                        curs.execute(add_column_sql)
+                        print("Added available_properties column to datasets table")
+                    else:
+                        print("available_properties column already exists")
+                    
+                    # Now populate the column for all existing datasets
+                    # Get all dataset IDs
+                    get_datasets_sql = "SELECT id FROM datasets;"
+                    curs.execute(get_datasets_sql)
+                    dataset_ids = [row[0] for row in curs.fetchall()]
+                    
+                    print(f"Found {len(dataset_ids)} datasets to update")
+                    
+                    for dataset_id in dataset_ids:
+                        try:
+                            # Get property definitions for this dataset
+                            pd_sql = """
+                                SELECT definition
+                                FROM property_definitions;
+                            """
+                            curs.execute(pd_sql)
+                            prop_defs = [json.loads(row[0]) for row in curs.fetchall()]
+                            
+                            # Get properties for this dataset
+                            props_sql = f"""
+                                SELECT * FROM property_objects 
+                                WHERE dataset_id = '{dataset_id}';
+                            """
+                            curs.execute(props_sql)
+                            props = curs.fetchall()
+                            
+                            if props:
+                                # Calculate available properties (similar to Dataset.to_spark_row logic)
+                                prop_def_map = {}
+                                prop_counts = {}
+                                
+                                for pd in prop_defs:
+                                    for k, v in pd.items():
+                                        if k not in ['property-id', 'property-name', 'property-title', 'property-description']:
+                                            prop_def_map[f"{pd['property-name'].replace('-','_')}_{k.replace('-','_')}"] = pd['property-name']
+                                            prop_counts[f"{pd['property-name'].replace('-','_')}_{k.replace('-','_')}"] = 0
+                                            break
+                                
+                                for p in props:
+                                    for k in p.keys():
+                                        if str(k) in prop_counts:
+                                            if p[str(k)] is not None:
+                                                prop_counts[str(k)] += 1
+                                
+                                available_props = []
+                                for k, v in prop_counts.items():
+                                    if v > 0:
+                                        available_props.append(prop_def_map[k])
+                                
+                                # Update the dataset with available properties
+                                update_sql = """
+                                    UPDATE datasets 
+                                    SET available_properties = %s 
+                                    WHERE id = %s;
+                                """
+                                curs.execute(update_sql, (available_props, dataset_id))
+                                print(f"Updated dataset {dataset_id} with {len(available_props)} available properties")
+                            else:
+                                # No properties found, set empty array
+                                update_sql = """
+                                    UPDATE datasets 
+                                    SET available_properties = %s 
+                                    WHERE id = %s;
+                                """
+                                curs.execute(update_sql, ([], dataset_id))
+                                print(f"Updated dataset {dataset_id} with empty available properties")
+                                
+                        except Exception as e:
+                            print(f"Error updating dataset {dataset_id}: {str(e)}")
+                            continue
+                    
+                    conn.commit()
+                    print("Migration completed successfully")
+                    
+        except Exception as e:
+            print(f"Migration failed: {str(e)}")
+            raise
 
 
 class S3BatchManager:
@@ -2504,3 +2610,5 @@ def get_dataset_pg(dataset_id):
             r = curs.execute(sql)
             return curs.fetchall()
 '''
+
+
