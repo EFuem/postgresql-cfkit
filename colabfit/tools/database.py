@@ -1821,6 +1821,8 @@ class DataManager:
 
         if isinstance(authors, str):
             authors = [authors]
+
+        pd = self.get_property_definitions()
         ds = Dataset(
             name=name,
             authors=authors,
@@ -1837,6 +1839,7 @@ class DataManager:
             configuration_set_ids=None,
             publication_year=publication_year,
             use_pg = True,
+            property_definitions = pd
         )
         row = ds.spark_row
         user = os.getlogin()
@@ -1945,6 +1948,7 @@ class DataManager:
             authors = old_ds['authors']
 
 
+        pd = self.get_property_definitions()
         ds = Dataset(
             name=old_ds['name'],
             authors=authors,
@@ -1962,6 +1966,7 @@ class DataManager:
             configuration_set_ids=None,
             publication_year=old_ds['publication_year'],
             use_pg = True,
+            property_definitions = pd
         )
         row = ds.spark_row
 

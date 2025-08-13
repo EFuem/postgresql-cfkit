@@ -81,6 +81,7 @@ class Dataset:
         description: str,
         config_df,
         prop_df,
+        property_definitions,
         other_links: list[str] = None,
         dataset_id: str = None,
         labels: list[str] = None,
@@ -90,7 +91,6 @@ class Dataset:
         publication_year: str = None,
         use_pg: bool = False,
     ):
-        print (authors)
         for auth in authors:
             if not "".join(auth.split(" ")[-1].replace("-", "")).isalpha():
                 raise RuntimeError(
@@ -98,6 +98,7 @@ class Dataset:
                     "can only contain [a-z][A-Z]"
                 )
 
+        self.property_definitions = property_definitions
         self.name = name
         self.authors = authors
         self.publication_link = publication_link
@@ -179,8 +180,24 @@ class Dataset:
         stress = 0
         energy = 0
         energies = []
+        
+        # TODO: Below
+        prop_def_map = {}
+        prop_counts = {}
+        # find available props from PD table
+        for pd in self.property_definitions:
+            # grab first property key name
+            for k,v in pd.items():
+                if k not in ['property-id', 'property-name', 'property-title', 'property-description']:
+                    prop_def_map[f"{pd['property-name'].replace('-','_')}_{k.replace('-','_')}"] = pd['property-name']
+                    prop_counts[f"{pd['property-name'].replace('-','_')}_{k.replace('-','_')}"] = 0
+                    break
+
         for p in props:
-            #print (p.keys())
+            for k in p.keys():
+                if str(k) in prop_counts:
+                    if p[str(k)] is not None:
+                        prop_counts[str(k)] += 1
             if p["atomic_forces_forces"] is not None:
                 forces += 1
             if p["cauchy_stress_stress"] is not None:
@@ -188,7 +205,12 @@ class Dataset:
             if p["energy_energy"] is not None:
                 energy += 1
                 energies.append(p["energy_energy"])
-
+        # TODO: iterate over counts if >0 add to available_properties
+        available_props = []
+        for k,v in prop_counts.items():
+            if v > 0:
+                available_props.append(prop_def_map[k])
+        print (available_props)
         row_dict['energy_mean'] = np.mean(energies)
         row_dict['energy_variance'] = np.var(energies)
         row_dict['atomic_forces_count'] = forces
@@ -273,7 +295,6 @@ class Dataset:
             .withColumn("single_element", sf.explode("atomic_numbers"))
         )
         total_elements = atomic_ratios_df.count()
-        print(total_elements, row_dict["nsites"])
         assert total_elements == row_dict["nsites"]
         atomic_ratios_df = atomic_ratios_df.groupBy("single_element").count()
         atomic_ratios_df = atomic_ratios_df.withColumn(
