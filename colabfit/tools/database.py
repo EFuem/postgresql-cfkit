@@ -1917,7 +1917,7 @@ class DataManager:
         # update dataset_id
         q = f"SELECT id FROM datasets where id LIKE '%{family}%'"
         res = self.general_query(q)
-        largest_version = sorted([r['id'].split('_')[-1] for r in res])[-1]
+        largest_version = sorted([int(r['id'].split('_')[-1]) for r in res])[-1]
         new_v_no = int(largest_version) + 1
         new_dataset_id = dataset_id.split('_')[0] + '_' + dataset_id.split('_')[1] + '_' + str(new_v_no)
         
