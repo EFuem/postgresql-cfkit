@@ -26,7 +26,9 @@ dependencies = [
     "vastdb",
     "psycopg",
     "pyspark",
-    "click>=7.0"
+    "click>=7.0",
+    "boto3",
+    "botocore"
 
 ]
 classifiers=[
