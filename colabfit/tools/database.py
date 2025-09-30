@@ -1871,10 +1871,10 @@ class DataManager:
             with conn.cursor() as curs:
                 curs.executemany(sql, [values])
 
-    def insert_new_column(self, table, column_name, data_type):
+    def insert_new_column(self, table, column_name, data_type, default = 'NULL'):
         sql = f"""
             ALTER TABLE {table}
-            ADD COLUMN {column_name} {data_type};
+            ADD COLUMN {column_name} {data_type} DEFAULT {default};
         """
         with psycopg.connect(dbname=self.dbname, user=self.user, port=self.port, host=self.host, password=self.password) as conn:
             with conn.cursor() as curs:
