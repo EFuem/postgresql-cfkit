@@ -1843,7 +1843,10 @@ class DataManager:
             property_definitions = pd
         )
         row = ds.spark_row
-        user = os.getlogin()
+        try:
+            user = os.getlogin()
+        except:
+            user = "Unknown"
         sql = """
             INSERT INTO datasets (last_modified, nconfigurations, nproperty_objects, nsites, nelements, elements, total_elements_ratio, nperiodic_dimensions, dimension_types, available_properties, energy_mean, energy_variance, atomic_forces_count, cauchy_stress_count, energy_count, authors, description, license, links, name, publication_year, doi, id, extended_id, hash, labels, property_map, uploader)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s, %s, %s, %s, %s)
@@ -1971,8 +1974,8 @@ class DataManager:
         row = ds.spark_row
 
         sql = """
-            INSERT INTO datasets (last_modified, nconfigurations, nproperty_objects, nsites, nelements, elements, total_elements_ratio, nperiodic_dimensions, dimension_types, energy_mean, energy_variance, atomic_forces_count, cauchy_stress_count, energy_count, authors, description, license, links, name, publication_year, doi, id, extended_id, hash, labels, property_map, uploader)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s, %s, %s, %s)
+            INSERT INTO datasets (last_modified, nconfigurations, nproperty_objects, nsites, nelements, elements, total_elements_ratio, nperiodic_dimensions, dimension_types, available_properties, energy_mean, energy_variance, atomic_forces_count, cauchy_stress_count, energy_count, authors, description, license, links, name, publication_year, doi, id, extended_id, hash, labels, property_map, uploader)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s, %s, %s, %s, %s)
             ON CONFLICT (hash)
             DO NOTHING
         """
@@ -1989,7 +1992,11 @@ class DataManager:
                     val = val.strftime("%Y-%m-%dT%H:%M:%SZ")
                 values.append(val)
         values.append(json.dumps(prop_map))
-        values.append(os.getlogin())
+        try:
+            user = os.getlogin()
+        except:
+            user = "Unknown"
+        values.append(user)
        
         with psycopg.connect(dbname=self.dbname, user=self.user, port=self.port, host=self.host, password=self.password) as conn:
             with conn.cursor() as curs:
@@ -2259,8 +2266,11 @@ class DataManager:
             with conn.cursor() as curs:
                 curs.execute(sql, (dataset_id,))
                 uploader = curs.fetchall()[0][0]
-
-        if uploader == os.getlogin():
+        try:
+            user = os.getlogin()
+        except:
+            user = "Unknown"
+        if uploader == user:
             print (f'Deleting {dataset_id}')
             sql = """
                 DELETE
